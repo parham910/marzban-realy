@@ -1,9 +1,8 @@
-import uuid
-import json
 import base64
+import json
 
 def generate_vless_config(user, server_ip, port):
-    return f"vless://{user.uuid}@{server_ip}:{port}?encryption=none&security=tls&sni={server_ip}&fp=chrome&type=ws&path=%2F#{user.username}"
+    return f"vless://{user.uuid}@{server_ip}:{port}?encryption=none&security=tls&sni={server_ip}&fp=chrome&type=tcp#{user.username}"
 
 def generate_vmess_config(user, server_ip, port):
     config = {
@@ -13,10 +12,8 @@ def generate_vmess_config(user, server_ip, port):
         "port": port,
         "id": user.uuid,
         "aid": "0",
-        "net": "ws",
+        "net": "tcp",
         "type": "none",
-        "host": "",
-        "path": "/",
         "tls": "tls"
     }
     config_json = json.dumps(config, separators=(',', ':'))
