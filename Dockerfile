@@ -16,7 +16,7 @@ COPY . .
 # کپی تنظیمات Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# اجرای Nginx در پس‌زمینه، سپس Xray و Flask
+# اسکریپت start.sh
 RUN echo '#!/bin/bash\n\
 nginx -g "daemon off;" &\n\
 /usr/local/bin/xray/xray run -c /app/xray_config.json &\n\
