@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>پنل مدیریت</title>
+    <style>
+        body { font-family: Tahoma; background: #0d1117; color: #c9d1d9; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .card { background: #161b22; padding: 20px; border-radius: 12px; margin: 15px 0; border: 1px solid #30363d; }
+        input, select { background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; padding: 10px; border-radius: 6px; margin: 5px; }
+        button { background: #238636; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .user-row { padding: 10px; border-bottom: 1px solid #21262d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 پنل مدیریت</h1>
+        
+        <div class="card">
+            <h2>➕ کاربر جدید</h2>
+            <form id="create-user">
+                <input id="username" placeholder="نام کاربری" required>
+                <select id="protocol">
+                    <option value="vless">VLESS</option>
+                    <option value="vmess">VMESS</option>
+                </select>
+                <input id="data_limit" type="number" placeholder="حجم (GB)" value="10">
+                <input id="port" type="number" placeholder="پورت" value="443">
+                <button type="submit">ایجاد</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>👥 کاربران</h2>
+            <div id="user-list"></div>
+        </div>
+    </div>
+
+    <script>
+        fetch('/api/users')
+            .then(res => res.json())
+            .then(users => {
+                const list = document.getElementById('user-list');
+                users.forEach(u => {
+                    const div = document.createElement('div');
+                    div.className = 'user-row';
+                    div.innerHTML = `
+                        <b>${u.username}</b> | 
+                        ${u.protocol} | 
+                        ${u.data_limit/1e9}GB | 
+                        ${new Date(u.expiry_date).toLocaleDateString('fa-IR')}
+                        <button onclick="deleteUser(${u.id})">🗑️</button>
+                    `;
+                    list.appendChild(div);
+                });
+            });
+
+        document.getElementById('create-user').onsubmit = function(e) {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById('username').value,
+                protocol: document.getElementById('protocol').value,
+                data_limit: parseFloat(document.getElementById('data_limit').value) * 1e9,
+                port: parseInt(document.getElementById('port').value)
+            };
+            fetch('/api/users', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            }).then(() => location.reload());
+        };
+
+        function deleteUser(id) {
+            fetch(`/api/users/${id}`, {method: 'DELETE'})
+                .then(() => location.reload());
+        }
+    </script>
+</body>
+</html>
