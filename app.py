@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from user_manager import UserManager
-from config_generator import generate_subscription
+from config_generator import generate_subscription, generate_vless_config, generate_vmess_config
 import json
 
 app = Flask(__name__)
@@ -24,6 +24,8 @@ def get_users():
 @app.route('/api/users', methods=['POST'])
 def create_user():
     data = request.json
+    server_ip = request.headers.get('X-Forwarded-Host', 'localhost')
+    
     user = UserManager.create_user(
         username=data['username'],
         protocol=data['protocol'],
@@ -31,21 +33,35 @@ def create_user():
         port=data['port'],
         expiry_days=30
     )
-    return jsonify({'status': 'created', 'id': user.id})
+    
+    if data['protocol'] == 'vless':
+        config_link = generate_vless_config(user, server_ip, data['port'])
+    else:
+        config_link = generate_vmess_config(user, server_ip, data['port'])
+    
+    return jsonify({
+        'status': 'created', 
+        'id': user.id,
+        'config_link': config_link
+    })
 
 @app.route('/api/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     UserManager.delete_user(user_id)
     return jsonify({'status': 'deleted'})
 
-@app.route('/sub/<username>')
-def get_sub(username):
-    user = UserManager.get_user_by_username(username)
+@app.route('/api/users/<int:user_id>/config')
+def get_user_config(user_id):
+    user = UserManager.get_user_by_id(user_id)
     if not user:
-        return "User not found", 404
-    # تولید ساب‌لینک برای این کاربر
-    sub_text = f"vless://{user.uuid}@example.com:{user.port}?..."
-    return sub_text
+        return jsonify({'error': 'User not found'}), 404
+    
+    server_ip = request.headers.get('X-Forwarded-Host', 'localhost')
+    if user.protocol == 'vless':
+        config_link = generate_vless_config(user, server_ip, user.port)
+    else:
+        config_link = generate_vmess_config(user, server_ip, user.port)
+    return jsonify({'config_link': config_link})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
