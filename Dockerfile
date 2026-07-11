@@ -16,5 +16,10 @@ COPY . .
 # کپی تنظیمات Nginx
 COPY nginx.conf /etc/nginx/nginx.conf
 
-# اجرای همه سرویس‌ها با یک دستور
-CMD ["sh", "-c", "/usr/local/bin/xray/xray run -c /app/xray_config.json & nginx -g 'daemon off;' & python app.py"]
+# اجرای Nginx در پس‌زمینه، سپس Xray و Flask
+RUN echo '#!/bin/bash\n\
+nginx -g "daemon off;" &\n\
+/usr/local/bin/xray/xray run -c /app/xray_config.json &\n\
+python app.py' > /app/start.sh && chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
