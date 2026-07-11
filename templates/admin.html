@@ -48,6 +48,7 @@
                         ${u.protocol} | 
                         ${u.data_limit/1e9}GB | 
                         ${new Date(u.expiry_date).toLocaleDateString('fa-IR')}
+                        <button onclick="copyConfig(${u.id})">📋 کپی کانفیگ</button>
                         <button onclick="deleteUser(${u.id})">🗑️</button>
                     `;
                     list.appendChild(div);
@@ -72,6 +73,16 @@
         function deleteUser(id) {
             fetch(`/api/users/${id}`, {method: 'DELETE'})
                 .then(() => location.reload());
+        }
+
+        function copyConfig(userId) {
+            fetch(`/api/users/${userId}/config`)
+                .then(res => res.json())
+                .then(data => {
+                    navigator.clipboard.writeText(data.config_link).then(() => {
+                        alert('✅ کانفیگ کپی شد!');
+                    });
+                });
         }
     </script>
 </body>
