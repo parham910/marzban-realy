@@ -18,7 +18,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 
 # اسکریپت start.sh
 RUN echo '#!/bin/bash\n\
-nginx -g "daemon off;" &\n\
+service nginx start\n\
 /usr/local/bin/xray/xray run -c /app/xray_config.json &\n\
 python app.py' > /app/start.sh && chmod +x /app/start.sh
 
