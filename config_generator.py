@@ -2,7 +2,8 @@ import base64
 import json
 
 def generate_vless_config(user, server_ip, port):
-    return f"vless://{user.uuid}@{server_ip}:{port}?encryption=none&security=tls&sni={server_ip}&fp=chrome&type=tcp#{user.username}"
+    # لینک VLESS با WebSocket
+    return f"vless://{user.uuid}@{server_ip}:{port}?encryption=none&security=none&type=ws&path=%2F#{user.username}"
 
 def generate_vmess_config(user, server_ip, port):
     config = {
@@ -12,9 +13,11 @@ def generate_vmess_config(user, server_ip, port):
         "port": port,
         "id": user.uuid,
         "aid": "0",
-        "net": "tcp",
+        "net": "ws",
         "type": "none",
-        "tls": "tls"
+        "host": "",
+        "path": "/",
+        "tls": "none"
     }
     config_json = json.dumps(config, separators=(',', ':'))
     return f"vmess://{base64.b64encode(config_json.encode()).decode()}"
