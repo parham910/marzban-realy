@@ -1,24 +1,32 @@
 {
   "log": {
-    "loglevel": "debug"
+    "loglevel": "warning"
   },
   "inbounds": [
     {
-      "port": 443,
+      "port": 8080,
       "protocol": "vless",
       "settings": {
         "clients": [],
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "tcp",
+        "network": "ws",
+        "wsSettings": {
+          "path": "/"
+        },
         "security": "none"
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
       }
     }
   ],
   "outbounds": [
     {
-      "protocol": "freedom"
+      "protocol": "freedom",
+      "settings": {}
     }
   ]
 }
